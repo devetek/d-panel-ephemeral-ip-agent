@@ -17,8 +17,8 @@ Berdasarkan 4 langkah yang dijalankan. Poin nomor 2 dan 3 adalah proses yang ber
 
 > [TODO]
 > 1. Dynamic remote port di tunnel server `dPanel Public Tunnel`
-> 2. Menyelesaikan module PAT di dPanel Manager
-> 3. Menyelesaikan `dPanel Agent` installer `curl https://artifact.dnocs.io/install.sh | sh -s <YOUR-PAT> ⁠`
+> 2. Menyelesaikan module PAT di dPanel Manager - https://trello.com/c/OYUIwmoK
+> 3. Menyelesaikan `dPanel Agent` installer `curl https://artifact.dnocs.io/install.sh | sh -s <YOUR-PAT> ⁠` - https://trello.com/c/O5XTD8Ou
 > 4. Membuat tunnel platform (UI / Backend) untuk membuat remote config client tunnel yang sudah terhubung
 > 5. Integrasi client tunnel dnegan `Tunnel Platform` untuk mengatur tunnel yang perlu dibuka 
 
