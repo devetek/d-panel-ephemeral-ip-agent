@@ -17,8 +17,7 @@ Berdasarkan 4 langkah yang dijalankan. Poin nomor 2 dan 3 adalah proses yang ber
 
 ### Architecture
 
-Coming Soon!
+![Architecture](assets/architecture.jpg)
 
 ### Appendix
-<!-- show image -->
 ![Simulation](assets/simulation.png)
