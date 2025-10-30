@@ -15,8 +15,12 @@ Setelah komunikasi terjalin antara `dPanel Ephemeral IP Agent` dan `dPanel Publi
 
 Berdasarkan 4 langkah yang dijalankan. Poin nomor 2 dan 3 adalah proses yang berjalan di dalam `Edge Computer`. Dan diatur oleh `dPanel Ephemeral IP Agent`. Sedangkan point nomor 1 adalah proses yang berjalan di dPanel Server yang diatur oleh `dPanel Manager`. Selanjutnya poin nomor 4 adalah proses yang dijalankan dPanel IaC untuk mengakses `Edge Computer` dan menjalankan perintah yang kita inginkan.
 
-> [!TODO]
-> 1. Memilih port tunnel secara acak sesuai dengan ketersediaan di `dPanel Public Tunnel`.
+> [TODO]
+> 1. Dynamic remote port di tunnel server `dPanel Public Tunnel`
+> 2. Menyelesaikan module PAT di dPanel Manager
+> 3. Menyelesaikan `dPanel Agent` installer `curl https://artifact.dnocs.io/install.sh | sh -s <YOUR-PAT> ⁠`
+> 4. Membuat tunnel platform (UI / Backend) untuk membuat remote config client tunnel yang sudah terhubung
+> 5. Integrasi client tunnel dnegan `Tunnel Platform` untuk mengatur tunnel yang perlu dibuka 
 
 ### Architecture
 
