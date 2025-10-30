@@ -23,4 +23,8 @@ Berdasarkan 4 langkah yang dijalankan. Poin nomor 2 dan 3 adalah proses yang ber
 ![Architecture](assets/architecture.jpg)
 
 ### Appendix
+Berikut adalah hasil dari simulasi untuk mengakses ssh server di port `2222` melalui port `2221`.
 ![Simulation](assets/simulation.png)
+
+Dan ini adalah hasil dari simulasi untuk mengakses web server di port `3000` melalui port `3001`.
+![HTTP Forwarder](assets/http-forwarder.png)
