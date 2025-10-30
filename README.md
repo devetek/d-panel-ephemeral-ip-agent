@@ -10,10 +10,14 @@ Setelah komunikasi terjalin antara `dPanel Ephemeral IP Agent` dan `dPanel Publi
 
 1. Jalankan `public-tunnel` dengan perintah `go run public-tunnel/main.go`
 2. Jalankan `ephemeral-ip-agent-ssh-server` dengan perintah `go run private-server/main.go`
-3. Jalankan `ephemeral-ip-agent-ssh-client` dengan perintah `ssh -N -R 2221:localhost:2222 -p 2220 localhost`
+3. Jalankan `ephemeral-ip-agent-ssh-client` dengan perintah `ssh -N -R 2221:localhost:2222 -p 2220 tunnel.dnocs.io`
 4. Akses `Edge Computer` dari dPanel Manager dengan perintah `ssh localhost -p 2221`
 
 Berdasarkan 4 langkah yang dijalankan. Poin nomor 2 dan 3 adalah proses yang berjalan di dalam `Edge Computer`. Dan diatur oleh `dPanel Ephemeral IP Agent`. Sedangkan point nomor 1 adalah proses yang berjalan di dPanel Server yang diatur oleh `dPanel Manager`. Selanjutnya poin nomor 4 adalah proses yang dijalankan dPanel IaC untuk mengakses `Edge Computer` dan menjalankan perintah yang kita inginkan.
+
+> [!TODO]
+> 1. Untuk menjalankan poin nomor 3 akan diganti dengan aplikasi `d-panel-tunnel-client`. Dengan perintah `./dpanel-tunnel <YOUR-TOKEN>`.
+> 2. Memilih port tunnel secara acak sesuai dengan ketersediaan di `dPanel Public Tunnel`.
 
 ### Architecture
 
