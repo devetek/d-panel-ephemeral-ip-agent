@@ -21,6 +21,7 @@ Berdasarkan 4 langkah yang dijalankan. Poin nomor 2 dan 3 adalah proses yang ber
 > 3. Menyelesaikan `dPanel Agent` installer `curl https://artifact.dnocs.io/install.sh | sh -s <YOUR-PAT> ⁠` - https://trello.com/c/O5XTD8Ou
 > 4. Membuat tunnel platform (UI / Backend) untuk membuat remote config client tunnel yang sudah terhubung
 > 5. Integrasi client tunnel dnegan `Tunnel Platform` untuk mengatur tunnel yang perlu dibuka 
+> 6. [Bug] tunnel-client error after tunnel-server restart / re-deploy. Need to restart tunnel-client automatically!
 
 ### Architecture
 
