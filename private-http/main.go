@@ -21,9 +21,13 @@ func main() {
 			return
 		}
 
+		log.Println("X-Forwarded-For:", r.Header.Get("X-Forwarded-For"))
+		log.Println("User-Agent:", r.Header.Get("User-Agent"))
+		log.Println("Access:", r.URL.Path)
+
 		data := PageData{
-			Title:   "Izin Remote Setengah Hari",
-			Content: "Abis jumatan agenda ke Bogor, ortu soalnya minggu rencana pulang, jadi dipadetin agendanya...",
+			Title:   "Mau online ken PC di rumah lu ?",
+			Content: "Pake dPanel makanya, jangan lupa daftar di <a href=\"https://cloud.terpusat.com/\">disini</a>.",
 		}
 
 		err = tmpl.Execute(w, data)
