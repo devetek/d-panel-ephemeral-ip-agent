@@ -52,8 +52,6 @@ func main() {
 			func(h ssh.Handler) ssh.Handler {
 				return func(s ssh.Session) {
 					wish.Println(s, "Remote port forwarding available!")
-					wish.Println(s, "Try it with:")
-					wish.Println(s, "ssh -N -R 2221:localhost:2222 -p 2220 localhost")
 					h(s)
 				}
 			},
