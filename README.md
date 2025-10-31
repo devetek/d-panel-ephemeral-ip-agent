@@ -11,7 +11,7 @@ Setelah komunikasi terjalin antara `dPanel Ephemeral IP Agent` dan `dPanel Publi
 1. Jalankan `public-tunnel` dengan perintah `go run public-tunnel/main.go`
 2. Jalankan `ephemeral-ssh-server` dengan perintah `go run private-server/main.go`
 3. Jalankan `ephemeral-tunnel-client` dengan perintah `go run client-tunnel/*.go`
-4. Akses `Edge Computer` dari `dPanel IaC` dengan perintah `ssh localhost -p 2221`, dan `http://localhost:3001` dari `dPanel Manager`
+4. Akses `Edge Computer` dari `dPanel IaC` dengan perintah `ssh tunnel.beta.devetek.app -p 2221`, dan `https://prakasa-dev.beta.devetek.app` dari `dPanel Manager`
 
 Berdasarkan 4 langkah yang dijalankan. Poin nomor 2 dan 3 adalah proses yang berjalan di dalam `Edge Computer`. Dan diatur oleh `dPanel Ephemeral IP Agent`. Sedangkan point nomor 1 adalah proses yang berjalan di dPanel Server yang diatur oleh `dPanel Manager`. Selanjutnya poin nomor 4 adalah proses yang dijalankan dPanel IaC untuk mengakses `Edge Computer` dan menjalankan perintah yang kita inginkan.
 
