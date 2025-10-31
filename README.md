@@ -22,6 +22,7 @@ Berdasarkan 4 langkah yang dijalankan. Poin nomor 2 dan 3 adalah proses yang ber
 > 4. Membuat tunnel platform (UI / Backend) untuk membuat remote config client tunnel yang sudah terhubung
 > 5. Integrasi client tunnel dnegan `Tunnel Platform` untuk mengatur tunnel yang perlu dibuka 
 > 6. [Bug] tunnel-client error after tunnel-server restart / re-deploy. Need to restart tunnel-client automatically!
+> 7. [Bug] Security enhancement, this is not production ready. No security layer implemented!
 
 ### Architecture
 
