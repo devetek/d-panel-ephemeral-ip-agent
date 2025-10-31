@@ -11,7 +11,7 @@ import (
 
 func main() {
 	tunnelSSH := NewTunnelRemoteForwarder(
-		WithTunnelHost("localhost"),
+		WithTunnelHost("tunnel.beta.devetek.app"),
 		WithTunnelPort("2220"),
 		WithTunnelAuthMethod(&ssh.ClientConfig{
 			Auth:            []ssh.AuthMethod{},
@@ -24,7 +24,7 @@ func main() {
 	)
 
 	tunnelHTTP := NewTunnelRemoteForwarder(
-		WithTunnelHost("localhost"),
+		WithTunnelHost("tunnel.beta.devetek.app"),
 		WithTunnelPort("2220"),
 		WithTunnelAuthMethod(&ssh.ClientConfig{
 			Auth:            []ssh.AuthMethod{},

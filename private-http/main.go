@@ -22,8 +22,8 @@ func main() {
 		}
 
 		data := PageData{
-			Title:   "My Dynamic Page",
-			Content: "This content is dynamically generated!",
+			Title:   "Izin Remote Setengah Hari",
+			Content: "Abis jumatan agenda ke Bogor, ortu soalnya minggu rencana pulang, jadi dipadetin agendanya...",
 		}
 
 		err = tmpl.Execute(w, data)
