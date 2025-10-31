@@ -20,13 +20,21 @@ const (
 	port = "2220"
 )
 
-// example usage: ssh -N -R 2221:localhost:2222 -p 2220 localhost
+func getPort() string {
+	myPort := os.Getenv("PORT")
+
+	if myPort == "" {
+		return port
+	}
+
+	return myPort
+}
 
 func main() {
 	// Create a new SSH ForwardedTCPHandler.
 	forwardHandler := &ssh.ForwardedTCPHandler{}
 	s, err := wish.NewServer(
-		wish.WithAddress(net.JoinHostPort(host, port)),
+		wish.WithAddress(net.JoinHostPort(host, getPort())),
 		// wish.WithHostKeyPath(".ssh/id_ed25519"),
 		func(s *ssh.Server) error {
 			// Set the Reverse TCP Handler up:
