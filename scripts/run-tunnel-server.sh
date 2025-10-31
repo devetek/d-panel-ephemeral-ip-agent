@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./dpanel-tunnel
+./bin-server-tunnel
