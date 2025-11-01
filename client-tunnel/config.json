@@ -18,5 +18,15 @@
     "service_host": "localhost",
     "service_port": "3000",
     "state": "active"
+  },
+    {
+    "id": "3",
+    "tunnel_host": "localhost",
+    "tunnel_port": "2220",
+    "listener_host": "0.0.0.0",
+    "listener_port": "3003",
+    "service_host": "localhost",
+    "service_port": "3000",
+    "state": "deleted"
   }
 ]

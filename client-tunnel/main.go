@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -13,6 +14,7 @@ func main() {
 		// WithURL("https://raw.githubusercontent.com/dPanel-ID/version/refs/heads/main/tunnel-dev.json"),
 		WithSource(ConfigSourceFile),
 		WithURL("./client-tunnel/config.json"),
+		WithInterval(5*time.Second),
 	)
 
 	done := make(chan os.Signal, 1)
