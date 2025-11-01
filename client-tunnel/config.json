@@ -1,7 +1,7 @@
 [
   {
     "id": "1",
-    "tunnel_host": "localhost",
+    "tunnel_host": "tunnel.beta.devetek.app",
     "tunnel_port": "2220",
     "listener_host": "0.0.0.0",
     "listener_port": "3001",
@@ -17,9 +17,9 @@
     "listener_port": "3002",
     "service_host": "localhost",
     "service_port": "3000",
-    "state": "active"
+    "state": "deleted"
   },
-    {
+  {
     "id": "3",
     "tunnel_host": "localhost",
     "tunnel_port": "2220",
