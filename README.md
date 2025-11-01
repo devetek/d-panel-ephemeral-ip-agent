@@ -11,18 +11,16 @@ Setelah komunikasi terjalin antara `dPanel Ephemeral IP Agent` dan `dPanel Publi
 1. Jalankan `public-tunnel` dengan perintah `go run public-tunnel/main.go`
 2. Jalankan `ephemeral-ssh-server` dengan perintah `go run private-server/main.go`
 3. Jalankan `ephemeral-tunnel-client` dengan perintah `go run client-tunnel/*.go`
-4. Akses `Edge Computer` dari `dPanel IaC` dengan perintah `ssh tunnel.beta.devetek.app -p 2221`, dan `https://prakasa-dev.beta.devetek.app` dari `dPanel Manager`
+4. Akses `Edge Computer` dari `dPanel IaC` melalui `ssh localhost -p <SSHTunnelPort>`, dan `http://localhost:<HTTPTunnelPort>` dari `dPanel Manager`
 
-Berdasarkan 4 langkah yang dijalankan. Poin nomor 2 dan 3 adalah proses yang berjalan di dalam `Edge Computer`. Dan diatur oleh `dPanel Ephemeral IP Agent`. Sedangkan point nomor 1 adalah proses yang berjalan di dPanel Server yang diatur oleh `dPanel Manager`. Selanjutnya poin nomor 4 adalah proses yang dijalankan dPanel IaC untuk mengakses `Edge Computer` dan menjalankan perintah yang kita inginkan.
+Berdasarkan 4 langkah yang dijalankan. Poin nomor 2 dan 3 adalah proses yang berjalan di dalam `Edge Computer`. Dan diatur oleh `dPanel Ephemeral IP Agent`. Sedangkan Poin nomor 1 adalah proses yang berjalan di dPanel Server yang diatur oleh `dPanel Manager`. Selanjutnya poin nomor 4 adalah proses yang dijalankan dPanel IaC untuk mengakses `Edge Computer` dan menjalankan perintah yang kita inginkan.
 
 > [TODO]
-> 1. Dynamic remote port di tunnel server `dPanel Public Tunnel`
-> 2. Menyelesaikan module PAT di dPanel Manager - https://trello.com/c/OYUIwmoK
-> 3. Menyelesaikan `dPanel Agent` installer `curl https://artifact.dnocs.io/install.sh | sh -s <YOUR-PAT> ⁠` - https://trello.com/c/O5XTD8Ou
-> 4. Membuat tunnel platform (UI / Backend) untuk membuat remote config client tunnel yang sudah terhubung
-> 5. Integrasi client tunnel dnegan `Tunnel Platform` untuk mengatur tunnel yang perlu dibuka 
-> 6. [Bug] tunnel-client error after tunnel-server restart / re-deploy. Need to restart tunnel-client automatically!
-> 7. [Bug] Security enhancement, this is not production ready. No security layer implemented!
+> 1. Menyelesaikan module PAT di dPanel Manager - https://trello.com/c/OYUIwmoK
+> 2. Menyelesaikan `dPanel Agent` installer `curl https://artifact.dnocs.io/install.sh | sh -s <YOUR-PAT> ⁠` - https://trello.com/c/O5XTD8Ou
+> 3. Tunnel platform (UI / Backend) untuk membuat remote config client tunnel yang sudah terhubung
+> 4. Integrasi client tunnel dnegan `Tunnel Platform` untuk mengatur tunnel yang perlu dibuka 
+> 5. [Bug] Security enhancement, this is not production ready. No security layer implemented!
 
 ### Architecture
 

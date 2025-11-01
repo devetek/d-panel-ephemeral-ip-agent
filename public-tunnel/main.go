@@ -35,6 +35,8 @@ func main() {
 	forwardHandler := &ssh.ForwardedTCPHandler{}
 	s, err := wish.NewServer(
 		wish.WithAddress(net.JoinHostPort(host, getPort())),
+		wish.WithMaxTimeout(1*time.Minute),
+		wish.WithIdleTimeout(1*time.Minute),
 		// wish.WithHostKeyPath(".ssh/id_ed25519"),
 		func(s *ssh.Server) error {
 			// Set the Reverse TCP Handler up:
