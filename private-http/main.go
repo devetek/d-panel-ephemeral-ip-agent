@@ -26,7 +26,7 @@ func main() {
 		log.Println("Access:", r.URL.Path)
 
 		data := PageData{
-			Title:   "Mau online ken PC di rumah lu ?",
+			Title:   "Mau online ken PC di rumah kalian ?",
 			Content: "Pake dPanel makanya, jangan lupa daftar di <a href=\"https://cloud.terpusat.com/\">disini</a>.",
 		}
 

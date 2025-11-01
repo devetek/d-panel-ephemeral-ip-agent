@@ -15,6 +15,7 @@ func main() {
 		WithSource(ConfigSourceFile),
 		WithURL("./client-tunnel/config.json"),
 		WithInterval(5*time.Second),
+		WithDebug(true),
 	)
 
 	done := make(chan os.Signal, 1)

@@ -21,3 +21,9 @@ func WithInterval(interval time.Duration) func(*Manager) {
 		conf.interval = interval
 	}
 }
+
+func WithDebug(enabled bool) func(*Manager) {
+	return func(conf *Manager) {
+		conf.debugEnabled = enabled
+	}
+}

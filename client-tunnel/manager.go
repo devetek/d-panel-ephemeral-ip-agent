@@ -109,23 +109,6 @@ func (manager *Manager) createNewConnection(config Config) *TunnelForwarder {
 	)
 }
 
-func (manager *Manager) initConfig() error {
-	if manager.source == ConfigSourceFile {
-		configs, err := manager.getConfigFromFile()
-		if err != nil {
-			return fmt.Errorf("Error fetching config from file: %v", err)
-		}
-		manager.configs = configs
-	} else if manager.source == ConfigSourceRemote {
-		configs, err := manager.getConfigFromRemote()
-		if err != nil {
-			return fmt.Errorf("Error fetching config from remote: %v", err)
-		}
-		manager.configs = configs
-	}
-	return nil
-}
-
 func (manager *Manager) getNewConfig() ([]Config, error) {
 	if manager.source == ConfigSourceFile {
 		newConfigs, err := manager.getConfigFromFile()
@@ -145,14 +128,14 @@ func (manager *Manager) getNewConfig() ([]Config, error) {
 }
 
 func (manager *Manager) Start() {
-	err := manager.initConfig()
+	newConfigs, err := manager.getNewConfig()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
 	// compare new config with old config
-	for _, newConfig := range manager.configs {
+	for _, newConfig := range newConfigs {
 		found := false
 		for _, oldConfig := range manager.configs {
 			if newConfig.ID == oldConfig.ID {
@@ -161,8 +144,10 @@ func (manager *Manager) Start() {
 			}
 		}
 		if !found {
-			// create new connection
-			manager.configs = append(manager.configs, newConfig)
+			// append new connection if not found and state is active
+			if newConfig.State == ConfigStateActive {
+				manager.configs = append(manager.configs, newConfig)
+			}
 		}
 	}
 
@@ -276,11 +261,14 @@ func (manager *Manager) tick() {
 				}
 			}
 			if !found {
-				// add new config
-				manager.configs = append(manager.configs, newConfig)
+				// add new config if state is active
+				if newConfig.State == ConfigStateActive {
+					manager.configs = append(manager.configs, newConfig)
+				}
 			}
 		}
 
+		// temporary array to store new config, copy array to tempArray
 		for index, config := range manager.configs {
 			// reconfigure connection if remote config is active
 			if config.State == ConfigStateActive {
@@ -321,7 +309,7 @@ func (manager *Manager) tick() {
 					manager.configs[index].connection = nil
 				}
 
-				// delete from array
+				// delete index from new array
 				manager.configs = append(manager.configs[:index], manager.configs[index+1:]...)
 			}
 		}
