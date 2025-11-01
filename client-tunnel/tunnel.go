@@ -1,21 +1,23 @@
 package main
 
+/** Tukiran (Tunneling Unified Key Integration and Routing Access Network).
+
+Is a package help you to expose your local TCP through ssh tunnel from any tunnel provider.
+Usualy when you want to connect to SSH tunnel, you need to run command `ssh -N -L <local-port>:<remote-host>:<remote-port> <tunnel-server>`.
+
+Copyright (c) 2025 Devetek. All rights reserved.
+*/
+
 import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"time"
 
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
 )
-
-/**
-Taref (Tunnel Remote Forwarder) - is a package hel you to expose your local TCP through ssh tunnel provider
-
-*/
 
 type tunnel struct {
 	host string
@@ -50,10 +52,13 @@ type TunnelForwarder struct {
 }
 
 func NewTunnelRemoteForwarder(opts ...TunnelForwarderOpt) *TunnelForwarder {
-	// init zap log
 	logger, error := zap.NewProduction()
 	if error != nil {
-		log.Fatalln("[Taref] - Failed to init zap logger!")
+		logger.Fatal(
+			"Failed to init zap logger!",
+			zap.Error(error),
+			zap.Dict("module", zap.String("name", "tukiran")),
+		)
 	}
 	defer logger.Sync()
 
@@ -82,6 +87,10 @@ func NewTunnelRemoteForwarder(opts ...TunnelForwarderOpt) *TunnelForwarder {
 	}
 
 	return &newTunnel
+}
+
+func (tf *TunnelForwarder) logger() *zap.Logger {
+	return tf.zap.With(zap.Dict("module", zap.String("name", "tukiran")))
 }
 
 // set connection state
@@ -131,13 +140,13 @@ func (tf *TunnelForwarder) IsClosed() bool {
 func (tf *TunnelForwarder) ListenAndServe() error {
 	if tf.listener == nil {
 		errMsg := "No listerner host and port set"
-		tf.zap.Error(errMsg)
+		tf.logger().Error(errMsg)
 		return errors.New(errMsg)
 	}
 
 	if tf.service == nil {
 		errMsg := "No service host and port set"
-		tf.zap.Error(errMsg)
+		tf.logger().Error(errMsg)
 		return errors.New(errMsg)
 	}
 
@@ -146,7 +155,7 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 
 	tf.sshClient, err = ssh.Dial("tcp", tf.getTunnelAddres(), tf.getTunnelAuth())
 	if err != nil {
-		tf.zap.Error("Failed to dial SSH server",
+		tf.logger().Error("Failed to dial SSH server",
 			zap.Error(err),
 		)
 		return err
@@ -156,20 +165,20 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 	// set connected state
 	tf.setState(2)
 
-	tf.zap.Info(fmt.Sprintf("SSH connection established to %s", tf.getTunnelAddres()))
+	tf.logger().Info(fmt.Sprintf("SSH connection established to %s", tf.getTunnelAddres()))
 
 	// Listen on the remote server
 	listener, err := tf.sshClient.Listen("tcp", tf.getListenerAddres())
 	if err != nil {
 		tf.setState(4)
-		tf.zap.Error("Failed to listen on remote server",
+		tf.logger().Error("Failed to listen on remote server",
 			zap.Error(err),
 		)
 		return err
 	}
 	defer listener.Close()
 
-	tf.zap.Info(fmt.Sprintf("Listening on remote server at %s. Forwarding to local service at %s", tf.getListenerAddres(), tf.getServiceAddres()))
+	tf.logger().Info(fmt.Sprintf("Listening on remote server at %s. Forwarding to local service at %s", tf.getListenerAddres(), tf.getServiceAddres()))
 
 	for {
 		// Accept incoming connections on the remote listener
@@ -182,7 +191,7 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 			// set connection status to closed
 			tf.setState(3)
 
-			tf.zap.Error("Failed to accept remote connection",
+			tf.logger().Error("Failed to accept remote connection",
 				zap.Error(err),
 			)
 			continue
@@ -191,20 +200,20 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 		go func() {
 			defer remoteConn.Close()
 
-			tf.zap.Info(fmt.Sprintf("Accepted remote connection from %s", remoteConn.RemoteAddr()))
+			tf.logger().Info(fmt.Sprintf("Accepted remote connection from %s", remoteConn.RemoteAddr()))
 
 			// Dial the local service
 			localConn, err := net.Dial("tcp", tf.getServiceAddres())
 			if err != nil {
 				tf.setState(4)
-				tf.zap.Error("Failed to dial service",
+				tf.logger().Error("Failed to dial service",
 					zap.Error(err),
 				)
 				return
 			}
 			defer localConn.Close()
 
-			tf.zap.Info(fmt.Sprintf("Connected to service at %s", tf.getServiceAddres()))
+			tf.logger().Info(fmt.Sprintf("Connected to service at %s", tf.getServiceAddres()))
 
 			// Copy data between remote and local connections
 			done := make(chan struct{})
@@ -215,7 +224,7 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 			io.Copy(localConn, remoteConn)
 			<-done // Wait for the other copy to finish
 
-			tf.zap.Info(fmt.Sprintf("Connection closed for remote %s", remoteConn.RemoteAddr()))
+			tf.logger().Info(fmt.Sprintf("Connection closed for remote %s", remoteConn.RemoteAddr()))
 		}()
 	}
 

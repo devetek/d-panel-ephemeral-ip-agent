@@ -1,5 +1,15 @@
 package main
 
+//
+
+/** Marijan (Managing and Routing Infrastructure for Joint Access Networks).
+
+By using Marijan, you can manage Tukiran to connect to multiple tunnels by using remote config or local file config.
+Marijan will help you to maintenance your tunnel connection always re-connect when it's disconnected.
+
+Copyright (c) 2025 Devetek. All rights reserved.
+*/
+
 import (
 	"encoding/json"
 	"fmt"
@@ -9,6 +19,7 @@ import (
 	"time"
 
 	"github.com/tkennon/ticker"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -21,9 +32,13 @@ const (
 
 type Manager struct {
 	// ctx     context.Context
-	source  ConfigSource
-	url     string
-	configs []Config
+	debugEnabled bool
+	source       ConfigSource
+	url          string
+	interval     time.Duration
+	configs      []Config
+	// wg      sync.WaitGroup
+	zap *zap.Logger
 }
 
 type ConfigState string
@@ -46,13 +61,36 @@ type Config struct {
 }
 
 func NewManager(opts ...ManagerOpt) *Manager {
+	logger, error := zap.NewProduction()
+	if error != nil {
+		logger.Fatal(
+			"Failed to init zap logger!",
+			zap.Error(error),
+			zap.Dict("module", zap.String("name", "tukiran")),
+		)
+	}
+	defer logger.Sync()
+
 	conf := &Manager{
-		configs: []Config{},
+		debugEnabled: false,
+		interval:     time.Minute,
+		zap:          logger,
+		configs:      []Config{},
 	}
 	for _, opt := range opts {
 		opt(conf)
 	}
 	return conf
+}
+
+func (manager *Manager) logger() *zap.Logger {
+	return manager.zap.With(zap.Dict("module", zap.String("name", "marijan")))
+}
+
+func (manager *Manager) debug(message string) {
+	if manager.debugEnabled {
+		manager.logger().Info(message)
+	}
 }
 
 func (manager *Manager) createNewConnection(config Config) *TunnelForwarder {
@@ -71,7 +109,7 @@ func (manager *Manager) createNewConnection(config Config) *TunnelForwarder {
 	)
 }
 
-func (manager *Manager) init() error {
+func (manager *Manager) initConfig() error {
 	if manager.source == ConfigSourceFile {
 		configs, err := manager.getConfigFromFile()
 		if err != nil {
@@ -88,8 +126,26 @@ func (manager *Manager) init() error {
 	return nil
 }
 
+func (manager *Manager) getNewConfig() ([]Config, error) {
+	if manager.source == ConfigSourceFile {
+		newConfigs, err := manager.getConfigFromFile()
+		if err != nil {
+			return nil, fmt.Errorf("Error fetching config from file: %v", err)
+		}
+		return newConfigs, nil
+	} else if manager.source == ConfigSourceRemote {
+		newConfigs, err := manager.getConfigFromRemote()
+		if err != nil {
+			return nil, fmt.Errorf("Error fetching config from remote: %v", err)
+		}
+		return newConfigs, nil
+	}
+
+	return nil, fmt.Errorf("Unknown config source: %s", manager.source)
+}
+
 func (manager *Manager) Start() {
-	err := manager.init()
+	err := manager.initConfig()
 	if err != nil {
 		log.Println(err)
 		return
@@ -112,16 +168,20 @@ func (manager *Manager) Start() {
 
 	// attach connection to the config
 	for index, config := range manager.configs {
-		manager.configs[index].connection = manager.createNewConnection(config)
+		if config.State == ConfigStateActive {
+			manager.configs[index].connection = manager.createNewConnection(config)
+		}
 	}
 
 	for _, config := range manager.configs {
-		go func() {
-			err := config.connection.ListenAndServe()
-			if err != nil {
-				log.Println(err)
-			}
-		}()
+		if config.State == ConfigStateActive {
+			go func() {
+				err := config.connection.ListenAndServe()
+				if err != nil {
+					log.Println(err)
+				}
+			}()
+		}
 	}
 
 	// running connection checker
@@ -137,23 +197,22 @@ func (manager *Manager) StopAll() {
 }
 
 func (manager *Manager) getConfigFromFile() ([]Config, error) {
+	var configs []Config
+
 	file, err := os.ReadFile(manager.url)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading file: %v", err)
+		return configs, fmt.Errorf("Error reading file: %v", err)
 	}
 
-	var configs []Config
 	if err := json.Unmarshal(file, &configs); err != nil {
-		return nil, fmt.Errorf("Error unmarshalling JSON: %v", err)
+		return configs, fmt.Errorf("Error unmarshalling JSON: %v", err)
 	}
 
 	return configs, nil
 }
 
 func (manager *Manager) getConfigFromRemote() ([]Config, error) {
-
 	var configs []Config
-	url := manager.url
 
 	// Create a custom HTTP client with a timeout
 	client := &http.Client{
@@ -161,7 +220,7 @@ func (manager *Manager) getConfigFromRemote() ([]Config, error) {
 	}
 
 	// Make the GET request
-	resp, err := client.Get(url)
+	resp, err := client.Get(manager.url)
 	if err != nil {
 		return configs, fmt.Errorf("Error making GET request: %v", err)
 	}
@@ -182,26 +241,37 @@ func (manager *Manager) getConfigFromRemote() ([]Config, error) {
 
 // Do check member is still connected or not
 func (manager *Manager) tick() {
-	log.Println("Start ticker to maintenance tunnels.....")
-	t := ticker.NewConstant(5 * time.Second)
+	manager.debug("Start ticker to maintenance tunnels.....")
+
+	t := ticker.NewConstant(manager.interval)
 
 	if err := t.Start(); err != nil {
-		log.Panicln("Failed to run maintainer connection", err)
+		manager.logger().Panic("Failed to run maintainer connection", zap.Error(err))
 	}
 	defer t.Stop()
 
 	for range t.C {
-		newConfigs, err := manager.getConfigFromFile()
+		newConfigs, err := manager.getNewConfig()
 		if err != nil {
-			log.Println(err)
+			manager.logger().Error("Error fetching config from remote", zap.Error(err))
 		}
 
 		// compare new config with old config
 		for _, newConfig := range newConfigs {
 			found := false
-			for _, oldConfig := range manager.configs {
+			for index, oldConfig := range manager.configs {
 				if newConfig.ID == oldConfig.ID {
 					found = true
+
+					// update config based on remote config
+					manager.configs[index].TunnelHost = newConfig.TunnelHost
+					manager.configs[index].TunnelPort = newConfig.TunnelPort
+					manager.configs[index].ListenerHost = newConfig.ListenerHost
+					manager.configs[index].ListenerPort = newConfig.ListenerPort
+					manager.configs[index].ServiceHost = newConfig.ServiceHost
+					manager.configs[index].ServicePort = newConfig.ServicePort
+					manager.configs[index].State = newConfig.State
+
 					continue
 				}
 			}
@@ -212,21 +282,10 @@ func (manager *Manager) tick() {
 		}
 
 		for index, config := range manager.configs {
-			if config.connection == nil {
-				// set new connection
-				manager.configs[index].connection = manager.createNewConnection(config)
-
-				go func() {
-					// start new connection!
-					err := manager.configs[index].connection.ListenAndServe()
-					if err != nil {
-						log.Println(err)
-					}
-				}()
-			}
-			if config.connection != nil {
-				if config.connection.getState() == 3 || config.connection.getState() == 0 {
-					log.Printf("Connection %s is closed, try to reconnect", config.connection.getID())
+			// reconfigure connection if remote config is active
+			if config.State == ConfigStateActive {
+				if config.connection == nil {
+					// set new connection
 					manager.configs[index].connection = manager.createNewConnection(config)
 
 					go func() {
@@ -237,8 +296,36 @@ func (manager *Manager) tick() {
 						}
 					}()
 				}
+				if config.connection != nil {
+					manager.debug(fmt.Sprintf("Connection %s state: %d", config.connection.getID(), config.connection.getState()))
+
+					if config.connection.getState() == 3 || config.connection.getState() == 0 {
+						manager.debug(fmt.Sprintf("Connection %s is closed, try to reconnect", config.connection.getID()))
+						manager.configs[index].connection = manager.createNewConnection(config)
+
+						go func() {
+							// start new connection!
+							err := manager.configs[index].connection.ListenAndServe()
+							if err != nil {
+								manager.logger().Error("Error reconnecting connection", zap.Error(err))
+							}
+						}()
+					}
+				}
+			}
+
+			// delete connection if remote config is inactive
+			if config.State == ConfigStateDeleted {
+				if config.connection != nil {
+					config.connection.Close()
+					manager.configs[index].connection = nil
+				}
+
+				// delete from array
+				manager.configs = append(manager.configs[:index], manager.configs[index+1:]...)
 			}
 		}
-	}
 
+		manager.debug(fmt.Sprintf("Check config length after maintenance: %d", len(manager.configs)))
+	}
 }
