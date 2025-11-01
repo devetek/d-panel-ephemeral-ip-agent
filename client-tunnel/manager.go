@@ -225,12 +225,8 @@ func (manager *Manager) tick() {
 				}()
 			}
 			if config.connection != nil {
-				log.Println(
-					"Connection ID: ", config.connection.getID(),
-					"with state ", config.connection.getState(),
-				)
 				if config.connection.getState() == 3 || config.connection.getState() == 0 {
-					log.Println("Connection is closed, try to reconnect")
+					log.Printf("Connection %s is closed, try to reconnect", config.connection.getID())
 					manager.configs[index].connection = manager.createNewConnection(config)
 
 					go func() {
