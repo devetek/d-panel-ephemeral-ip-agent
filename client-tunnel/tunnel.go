@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"time"
 
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
@@ -27,11 +28,25 @@ type tcp struct {
 	port string
 }
 
+type ConnectionState int
+
+const (
+	Idle ConnectionState = iota
+	Connecting
+	Connected
+	Closed
+	Error
+)
+
 type TunnelForwarder struct {
-	tunnel   *tunnel
-	listener *tcp
-	service  *tcp
-	zap      *zap.Logger
+	id        string
+	tunnel    *tunnel
+	listener  *tcp
+	service   *tcp
+	zap       *zap.Logger
+	sshClient *ssh.Client
+	state     ConnectionState
+	closed    bool
 }
 
 func NewTunnelRemoteForwarder(opts ...TunnelForwarderOpt) *TunnelForwarder {
@@ -43,6 +58,7 @@ func NewTunnelRemoteForwarder(opts ...TunnelForwarderOpt) *TunnelForwarder {
 	defer logger.Sync()
 
 	newTunnel := TunnelForwarder{
+		id: time.Now().String(),
 		tunnel: &tunnel{
 			host: "localhost",
 			port: "22",
@@ -56,7 +72,8 @@ func NewTunnelRemoteForwarder(opts ...TunnelForwarderOpt) *TunnelForwarder {
 			host: "localhost",
 			port: "3000",
 		},
-		zap: logger,
+		zap:    logger,
+		closed: false,
 	}
 
 	// set user configuration
@@ -65,6 +82,21 @@ func NewTunnelRemoteForwarder(opts ...TunnelForwarderOpt) *TunnelForwarder {
 	}
 
 	return &newTunnel
+}
+
+// set connection state
+func (tf *TunnelForwarder) setState(state int) {
+	tf.state = ConnectionState(state)
+}
+
+// get connection state
+func (tf *TunnelForwarder) getState() ConnectionState {
+	return tf.state
+}
+
+// get connection id
+func (tf *TunnelForwarder) getID() string {
+	return tf.id
 }
 
 // get tunnel server address
@@ -87,6 +119,15 @@ func (tf *TunnelForwarder) getServiceAddres() string {
 	return tf.service.host + ":" + tf.service.port
 }
 
+// get status connection
+func (tf *TunnelForwarder) IsClosed() bool {
+	if tf.getState() == ConnectionState(3) {
+		return true
+	}
+
+	return false
+}
+
 func (tf *TunnelForwarder) ListenAndServe() error {
 	if tf.listener == nil {
 		errMsg := "No listerner host and port set"
@@ -101,20 +142,26 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 	}
 
 	// Establish SSH connection
-	sshClient, err := ssh.Dial("tcp", tf.getTunnelAddres(), tf.getTunnelAuth())
+	var err error
+
+	tf.sshClient, err = ssh.Dial("tcp", tf.getTunnelAddres(), tf.getTunnelAuth())
 	if err != nil {
 		tf.zap.Error("Failed to dial SSH server",
 			zap.Error(err),
 		)
 		return err
 	}
-	defer sshClient.Close()
+	defer tf.sshClient.Close()
 
-	tf.zap.Info(fmt.Sprintf("SSH connection established to %s", tf.getListenerAddres()))
+	// set connected state
+	tf.setState(2)
+
+	tf.zap.Info(fmt.Sprintf("SSH connection established to %s", tf.getTunnelAddres()))
 
 	// Listen on the remote server
-	listener, err := sshClient.Listen("tcp", tf.getListenerAddres())
+	listener, err := tf.sshClient.Listen("tcp", tf.getListenerAddres())
 	if err != nil {
+		tf.setState(4)
 		tf.zap.Error("Failed to listen on remote server",
 			zap.Error(err),
 		)
@@ -128,6 +175,13 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 		// Accept incoming connections on the remote listener
 		remoteConn, err := listener.Accept()
 		if err != nil {
+			// check if connection already close, break loop
+			if tf.IsClosed() {
+				break
+			}
+			// set connection status to closed
+			tf.setState(3)
+
 			tf.zap.Error("Failed to accept remote connection",
 				zap.Error(err),
 			)
@@ -142,6 +196,7 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 			// Dial the local service
 			localConn, err := net.Dial("tcp", tf.getServiceAddres())
 			if err != nil {
+				tf.setState(4)
 				tf.zap.Error("Failed to dial service",
 					zap.Error(err),
 				)
@@ -162,5 +217,14 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 
 			tf.zap.Info(fmt.Sprintf("Connection closed for remote %s", remoteConn.RemoteAddr()))
 		}()
+	}
+
+	return nil
+}
+
+func (tf *TunnelForwarder) Close() {
+	if tf.sshClient != nil {
+		tf.setState(3)
+		tf.sshClient.Close()
 	}
 }

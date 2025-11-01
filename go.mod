@@ -10,6 +10,7 @@ require (
 	github.com/charmbracelet/wish v1.4.7
 	github.com/creack/pty v1.1.24
 	github.com/gliderlabs/ssh v0.3.8
+	github.com/tkennon/ticker v1.1.0
 	golang.org/x/crypto v0.37.0
 )
 

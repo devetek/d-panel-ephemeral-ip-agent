@@ -4,6 +4,13 @@ import "golang.org/x/crypto/ssh"
 
 type TunnelForwarderOpt func(*TunnelForwarder)
 
+// set connection id
+func WithConnectionID(id string) func(*TunnelForwarder) {
+	return func(tf *TunnelForwarder) {
+		tf.id = id
+	}
+}
+
 // set tunnel host, you can use `tunnel.dnocs.io` or another tunnel providers
 func WithTunnelHost(host string) func(*TunnelForwarder) {
 	return func(tf *TunnelForwarder) {
