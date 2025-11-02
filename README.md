@@ -37,7 +37,7 @@ Kamu dapat menggunakan Tukiran dan Marijan terpisah dari `dPanel Agent`. Jika ha
 
 1. Menggunakan binary yang sudah disediakan di [halaman release](https://github.com/dPanel-ID/go-ssh-server/releases). Download binary yang sesuai dengan platformmu. Kemudian, extract binary tersebut, dan jalankan binary tersebut dengan perintah berikut ini:
 ```sh
-./tukiran --config <CONFIG-FILE>
+./marijan run --config <CONFIG-FILE>
 ```
 Ganti `<CONFIG-FILE>` dengan path ke file config yang kamu miliki. Jika config tidak diatur, Tukiran akan menggunakan config default di `~/.marijan/config.json`.
 
