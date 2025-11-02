@@ -45,7 +45,7 @@ Ganti `<CONFIG-FILE>` dengan path ke file config yang kamu miliki. Jika config t
 
 ```go
 import (
-	"github.com/devetek/go-ssh-server/pkg/marijan"
+	"github.com/devetek/tukiran-dan-marijan/pkg/marijan"
 )
 
 manager := marijan.NewManager(
