@@ -40,7 +40,7 @@ Kamu dapat menggunakan Tukiran dan Marijan terpisah dari `dPanel Agent`. Jika ha
 ```sh
 ./tukiran --config <CONFIG-FILE>
 ```
-Ganti `<CONFIG-FILE>` dengan path ke file config yang kamu miliki.
+Ganti `<CONFIG-FILE>` dengan path ke file config yang kamu miliki. Jika config tidak diatur, Tukiran akan menggunakan config default di `~/.marijan/config.json`.
 
 2. Menggunakan Tukiran dan Marijan sebagai library di dalam aplikasi kamu. Kamu dapat mengintegrasikan Tukiran dan Marijan ke dalam aplikasi kamu dengan menggunakan library yang disediakan.
 

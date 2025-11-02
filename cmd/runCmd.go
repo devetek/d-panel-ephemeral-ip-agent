@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path"
 	"syscall"
 	"time"
 
@@ -48,8 +49,15 @@ func runCmd() *cobra.Command {
 		},
 	}
 
+	// get default config path relative to home directory
+	defaultConfigPath, err := os.UserHomeDir()
+	if err != nil {
+		logger.Error("Error getting user home directory: %v", zap.Error(err))
+	}
+	defaultConfigPath = path.Join(defaultConfigPath, ".marijan/config.json")
+
 	runCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
-	runCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "~/.marijan/config.json", "Path to the config file")
+	runCmd.PersistentFlags().StringVarP(&configFile, "config", "c", defaultConfigPath, "Path to the config file")
 
 	return runCmd
 }
