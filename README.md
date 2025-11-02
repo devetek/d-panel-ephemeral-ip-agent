@@ -35,17 +35,35 @@ Tukiran dan Marijan adalah paket yang sudah termasuk di dalam `dPanel Agent`. Ka
 
 Kamu dapat menggunakan Tukiran dan Marijan terpisah dari `dPanel Agent`. Jika hanya ingin mengekspose port di dalam jaringan private ke public, tanpa perlu mengatur mesin di dPanel. Ada 2 cara yang dapat digunakan:
 
-1. Menggunakan binary yang sudah disediakan di [halaman release](https://github.com/dPanel-ID/go-ssh-server/releases). Download binary yang sesuai dengan platformmu. Kemudian, extract binary tersebut, dan jalankan binary tersebut dengan perintah berikut ini:
+1. Menggunakan binary yang sudah disediakan di [halaman release](https://github.com/devetek/tuman/releases). Download binary yang sesuai dengan platformmu. Kemudian, extract binary tersebut, dan jalankan binary tersebut dengan perintah berikut ini:
 ```sh
 ./marijan run --config <CONFIG-FILE>
 ```
-Ganti `<CONFIG-FILE>` dengan path ke file config yang kamu miliki. Jika config tidak diatur, Tukiran akan menggunakan config default di `~/.marijan/config.json`.
+Ganti `<CONFIG-FILE>` dengan path ke file config yang kamu miliki. Jika config tidak diatur, Marijan akan menggunakan config default di `~/.marijan/config.json`. File config memiliki format JSON, dan memiliki struktur sebagai berikut:
+
+```json
+[
+  {
+    "id": "tunnel-1",
+    "tunnel_host": "tunnel.beta.devetek.app",
+    "tunnel_port": "2220",
+    "listener_host": "0.0.0.0",
+    "listener_port": "3001",
+    "service_host": "localhost",
+    "service_port": "3000",
+    "state": "active"
+  }
+]
+```
+Contoh config di atas akan membuat tunnel dengan id `tunnel-1` dengan state `active` yang artinya tunnel akan diaktifkan. Tunnel tersebut akan menghubungkan port `3001` di listener host ke port `3000` di lokal kamu. Tunnel akan terhubung ke `tunnel.beta.devetek.app` di port `2220`.
+
+Contoh pengaturan dapat ditemukan di [files/config.json](files/config.json).
 
 2. Menggunakan Tukiran dan Marijan sebagai library di dalam aplikasi kamu. Kamu dapat mengintegrasikan Tukiran dan Marijan ke dalam aplikasi kamu dengan menggunakan library yang disediakan.
 
 ```go
 import (
-	"github.com/devetek/tukiran-dan-marijan/pkg/marijan"
+	"github.com/devetek/tuman/pkg/marijan"
 )
 
 manager := marijan.NewManager(

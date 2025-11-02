@@ -18,7 +18,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/devetek/tukiran-dan-marijan/pkg/tukiran"
+	"github.com/devetek/tuman/pkg/tukiran"
 	"github.com/tkennon/ticker"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"

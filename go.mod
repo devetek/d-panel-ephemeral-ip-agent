@@ -1,4 +1,4 @@
-module github.com/devetek/tukiran-dan-marijan
+module github.com/devetek/tuman
 
 go 1.23.0
 

@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/devetek/tukiran-dan-marijan/pkg/marijan"
+	"github.com/devetek/tuman/pkg/marijan"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
