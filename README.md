@@ -11,9 +11,8 @@ Untuk dapat menggunakan Tukiran dan Marijan, kamu perlu melakukan instalasi `dPa
 ```sh
 curl -sSL https://artifact.dnocs.io/install-with-tunnel.sh | sh -s -- --private-token <PRIVATE-TOKEN>
 ```
-Ganti `<PRIVATE-TOKEN>` dengan private token yang sudah kamu salin di langkah sebelumnya.
+Ganti `<PRIVATE-TOKEN>` dengan private token yang sudah kamu salin di langkah sebelumnya. Setelah instalasi selesai, kamu dapat mengatur untuk membuka port di dalam jaringan private melalui [dPanel Tunnel Manager](https://cloud.terpusat.com/tunnel).
 
-Setelah instalasi selesai, kamu dapat mengatur untuk membuka port di dalam jaringan private melalui [dPanel Tunnel Manager](https://cloud.terpusat.com/tunnel).
 5. Setelah membuat tunnel di dPanel. Kamu dapat mendaftarkan mesin yang terhubung tersebut di menu `Machines` di dPanel.
 
 ### Cara Beroperasi
