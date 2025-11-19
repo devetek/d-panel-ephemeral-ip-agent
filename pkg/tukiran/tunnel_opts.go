@@ -14,6 +14,13 @@ func WithConnectionID(id string) func(*TunnelForwarder) {
 	}
 }
 
+// set listen use socket instead
+func WithSocketListener(useSocket bool) func(*TunnelForwarder) {
+	return func(tf *TunnelForwarder) {
+		tf.useSocket = useSocket
+	}
+}
+
 // set tunnel host, you can use `tunnel.dnocs.io` or another tunnel providers
 func WithTunnelHost(host string) func(*TunnelForwarder) {
 	return func(tf *TunnelForwarder) {

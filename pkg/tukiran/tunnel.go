@@ -3,7 +3,6 @@ package tukiran
 /** Tukiran (Tunneling Unified Key Integration and Routing Access Network).
 
 Is a package help you to expose your local TCP through ssh tunnel from any tunnel provider.
-Usualy when you want to connect to SSH tunnel, you need to run command `ssh -N -L <local-port>:<remote-host>:<remote-port> <tunnel-server>`.
 
 Copyright (c) 2025 Devetek. All rights reserved.
 */
@@ -13,6 +12,8 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"path/filepath"
+	"strings"
 
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
@@ -40,6 +41,7 @@ const (
 )
 
 type TunnelForwarder struct {
+	useSocket bool
 	id        string
 	tunnel    *tunnel
 	listener  *tcp
@@ -100,6 +102,16 @@ func (tf *TunnelForwarder) GetStateString() string {
 	}
 }
 
+// get protocol used
+func (tf *TunnelForwarder) getUnixOrTCP() string {
+	var n = "tcp"
+	if tf.useSocket {
+		n = "unix"
+	}
+
+	return n
+}
+
 // get connection id
 func (tf *TunnelForwarder) GetID() string {
 	return tf.id
@@ -117,6 +129,12 @@ func (tf *TunnelForwarder) getTunnelAuth() *ssh.ClientConfig {
 
 // get listener address in tunnel server
 func (tf *TunnelForwarder) getListenerAddres() string {
+	if strings.HasPrefix(tf.listener.host, "/") {
+		joinedPath := filepath.Join(tf.listener.host, tf.GetID())
+
+		return joinedPath
+	}
+
 	return tf.listener.host + ":" + tf.listener.port
 }
 
@@ -127,11 +145,7 @@ func (tf *TunnelForwarder) getServiceAddres() string {
 
 // get status connection
 func (tf *TunnelForwarder) IsClosed() bool {
-	if tf.GetState() == ConnectionState(3) {
-		return true
-	}
-
-	return false
+	return tf.GetState() == ConnectionState(3)
 }
 
 func (tf *TunnelForwarder) ListenAndServe() error {
@@ -165,7 +179,7 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 	tf.logger().Info(fmt.Sprintf("SSH connection established to %s", tf.getTunnelAddres()))
 
 	// Listen on the remote server
-	listener, err := tf.sshClient.Listen("tcp", tf.getListenerAddres())
+	listener, err := tf.sshClient.Listen(tf.getUnixOrTCP(), tf.getListenerAddres())
 	if err != nil {
 		tf.setState(4)
 		tf.logger().Error("Failed to listen on remote server",

@@ -1,0 +1,12 @@
+[
+  {
+    "no_tcp": true,
+    "id": "localhost",
+    "tunnel_host": "127.0.0.1",
+    "tunnel_port": "2220",
+    "listener_host": "/Users/prakasa/socket",
+    "service_host": "localhost",
+    "service_port": "3000",
+    "state": "active"
+  }
+]
