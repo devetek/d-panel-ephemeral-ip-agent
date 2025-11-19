@@ -3,7 +3,6 @@ package tukiran
 /** Tukiran (Tunneling Unified Key Integration and Routing Access Network).
 
 Is a package help you to expose your local TCP through ssh tunnel from any tunnel provider.
-Usualy when you want to connect to SSH tunnel, you need to run command `ssh -N -L <local-port>:<remote-host>:<remote-port> <tunnel-server>`.
 
 Copyright (c) 2025 Devetek. All rights reserved.
 */
@@ -13,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strconv"
 
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
@@ -40,6 +40,7 @@ const (
 )
 
 type TunnelForwarder struct {
+	useSocket bool
 	id        string
 	tunnel    *tunnel
 	listener  *tcp
@@ -105,6 +106,23 @@ func (tf *TunnelForwarder) GetID() string {
 	return tf.id
 }
 
+// validate tunnel server address is port or socket
+func (tf *TunnelForwarder) isPortNumber() bool {
+	if tf.tunnel == nil {
+		return false
+	}
+	if tf.listener.port == "" {
+		return false
+	}
+
+	v, err := strconv.ParseUint(tf.listener.port, 10, 16)
+	if err != nil {
+		return false
+	}
+
+	return v != 0
+}
+
 // get tunnel server address
 func (tf *TunnelForwarder) getTunnelAddres() string {
 	return tf.tunnel.host + ":" + tf.tunnel.port
@@ -127,11 +145,7 @@ func (tf *TunnelForwarder) getServiceAddres() string {
 
 // get status connection
 func (tf *TunnelForwarder) IsClosed() bool {
-	if tf.GetState() == ConnectionState(3) {
-		return true
-	}
-
-	return false
+	return tf.GetState() == ConnectionState(3)
 }
 
 func (tf *TunnelForwarder) ListenAndServe() error {
@@ -164,8 +178,15 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 
 	tf.logger().Info(fmt.Sprintf("SSH connection established to %s", tf.getTunnelAddres()))
 
+	var n = "tcp"
+	var address = tf.getListenerAddres()
+	if tf.useSocket {
+		n = "unix"
+		address = "/Users/prakasa/Projects/tunnel-server/" + address
+	}
+
 	// Listen on the remote server
-	listener, err := tf.sshClient.Listen("tcp", tf.getListenerAddres())
+	listener, err := tf.sshClient.Listen(n, address)
 	if err != nil {
 		tf.setState(4)
 		tf.logger().Error("Failed to listen on remote server",

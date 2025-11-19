@@ -50,6 +50,7 @@ const (
 )
 
 type Config struct {
+	NoTCP        bool        `json:"no_tcp"`
 	ID           string      `json:"id"`
 	TunnelHost   string      `json:"tunnel_host"`
 	TunnelPort   string      `json:"tunnel_port"`
@@ -90,6 +91,7 @@ func (manager *Manager) debug(message string) {
 func (manager *Manager) createNewConnection(config Config) *tukiran.TunnelForwarder {
 	return tukiran.NewTunnelRemoteForwarder(
 		tukiran.WithLogger(manager.zap),
+		tukiran.WithSocketListener(config.NoTCP),
 		tukiran.WithConnectionID(config.ID),
 		tukiran.WithTunnelHost(config.TunnelHost),
 		tukiran.WithTunnelPort(config.TunnelPort),
