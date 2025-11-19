@@ -7,7 +7,7 @@ import (
 func TestIsListenerPortNumber_Valid(t *testing.T) {
 	tf := NewTunnelRemoteForwarder(WithListenerPort("2220"))
 
-	if !tf.isPortNumber() {
-		t.Fatalf("expected false for valid port")
+	if tf.listener.port != "2220" {
+		t.Fatalf("Server forwarding port is not set properly")
 	}
 }

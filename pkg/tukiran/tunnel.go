@@ -12,7 +12,8 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"strconv"
+	"path/filepath"
+	"strings"
 
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
@@ -101,26 +102,19 @@ func (tf *TunnelForwarder) GetStateString() string {
 	}
 }
 
+// get protocol used
+func (tf *TunnelForwarder) getUnixOrTCP() string {
+	var n = "tcp"
+	if tf.useSocket {
+		n = "unix"
+	}
+
+	return n
+}
+
 // get connection id
 func (tf *TunnelForwarder) GetID() string {
 	return tf.id
-}
-
-// validate tunnel server address is port or socket
-func (tf *TunnelForwarder) isPortNumber() bool {
-	if tf.tunnel == nil {
-		return false
-	}
-	if tf.listener.port == "" {
-		return false
-	}
-
-	v, err := strconv.ParseUint(tf.listener.port, 10, 16)
-	if err != nil {
-		return false
-	}
-
-	return v != 0
 }
 
 // get tunnel server address
@@ -135,6 +129,12 @@ func (tf *TunnelForwarder) getTunnelAuth() *ssh.ClientConfig {
 
 // get listener address in tunnel server
 func (tf *TunnelForwarder) getListenerAddres() string {
+	if strings.HasPrefix(tf.listener.host, "/") {
+		joinedPath := filepath.Join(tf.listener.host, tf.GetID())
+
+		return joinedPath
+	}
+
 	return tf.listener.host + ":" + tf.listener.port
 }
 
@@ -178,15 +178,8 @@ func (tf *TunnelForwarder) ListenAndServe() error {
 
 	tf.logger().Info(fmt.Sprintf("SSH connection established to %s", tf.getTunnelAddres()))
 
-	var n = "tcp"
-	var address = tf.getListenerAddres()
-	if tf.useSocket {
-		n = "unix"
-		address = "/Users/prakasa/Projects/tunnel-server/" + address
-	}
-
 	// Listen on the remote server
-	listener, err := tf.sshClient.Listen(n, address)
+	listener, err := tf.sshClient.Listen(tf.getUnixOrTCP(), tf.getListenerAddres())
 	if err != nil {
 		tf.setState(4)
 		tf.logger().Error("Failed to listen on remote server",
