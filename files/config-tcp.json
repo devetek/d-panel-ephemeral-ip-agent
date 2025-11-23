@@ -1,12 +1,22 @@
 [
   {
-    "id": "localhost",
+    "id": "localhost-http",
     "tunnel_host": "127.0.0.1",
     "tunnel_port": "2220",
     "listener_host": "localhost",
-    "listener_port": "3001",
+    "listener_port": "2224",
     "service_host": "localhost",
     "service_port": "3000",
+    "state": "active"
+  },
+    {
+    "id": "localhost-ssh",
+    "tunnel_host": "127.0.0.1",
+    "tunnel_port": "2220",
+    "listener_host": "localhost",
+    "listener_port": "2223",
+    "service_host": "localhost",
+    "service_port": "2222",
     "state": "active"
   }
 ]
