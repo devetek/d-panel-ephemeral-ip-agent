@@ -289,8 +289,10 @@ func (manager *Manager) tick() {
 				if config.connection != nil {
 					manager.debug(fmt.Sprintf("Connection ID %s %s", config.connection.GetID(), config.connection.GetStateString()))
 
-					if config.connection.GetState() == tukiran.Closed || config.connection.GetState() == tukiran.Idle {
-						manager.debug(fmt.Sprintf("Connection ID %s is closed, try to reconnect", config.connection.GetID()))
+					if config.connection.GetState() == tukiran.Closed ||
+						config.connection.GetState() == tukiran.Idle ||
+						config.connection.GetState() == tukiran.Error {
+						manager.debug(fmt.Sprintf("Connection ID %s is %s, try to reconnect", config.connection.GetID(), config.connection.GetStateString()))
 						manager.configs[index].connection = manager.createNewConnection(config)
 
 						go func() {
