@@ -32,7 +32,7 @@ func runCmd() *cobra.Command {
 			manager := marijan.NewManager(
 				marijan.WithURL(configFile),
 				marijan.WithSource(marijan.ConfigSourceFile),
-				marijan.WithInterval(1*time.Second),
+				marijan.WithInterval(900*time.Millisecond),
 				marijan.WithDebug(verbose),
 				marijan.WithLogger(logger),
 			)

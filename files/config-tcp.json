@@ -1,5 +1,6 @@
 [
   {
+    "type": "http",
     "id": "localhost-http",
     "tunnel_host": "127.0.0.1",
     "tunnel_port": "2220",
@@ -9,12 +10,13 @@
     "service_port": "3000",
     "state": "active"
   },
-    {
+  {
+    "type": "tcp",
     "id": "localhost-ssh",
     "tunnel_host": "127.0.0.1",
     "tunnel_port": "2220",
     "listener_host": "localhost",
-    "listener_port": "2223",
+    "listener_port": "2225",
     "service_host": "localhost",
     "service_port": "2222",
     "state": "active"
