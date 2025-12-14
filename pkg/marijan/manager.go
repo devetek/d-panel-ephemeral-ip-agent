@@ -52,6 +52,7 @@ const (
 type Config struct {
 	NoTCP        bool        `json:"no_tcp"`
 	ID           string      `json:"id"`
+	Type         string      `json:"type"`
 	TunnelHost   string      `json:"tunnel_host"`
 	TunnelPort   string      `json:"tunnel_port"`
 	ListenerHost string      `json:"listener_host"`
@@ -293,14 +294,21 @@ func (manager *Manager) tick() {
 						config.connection.GetState() == tukiran.Idle ||
 						config.connection.GetState() == tukiran.Error {
 						manager.debug(fmt.Sprintf("Connection ID %s is %s, try to reconnect", config.connection.GetID(), config.connection.GetStateString()))
-						manager.configs[index].connection = manager.createNewConnection(config)
 
 						go func() {
-							// start new connection!
-							err := manager.configs[index].connection.ListenAndServe()
-							if err != nil {
-								manager.logger().Error("Error reconnecting connection", zap.Error(err))
+							if manager.configs[index].Type == "http" {
+								err = manager.configs[index].connection.ListenAndServeHTTP()
+								if err != nil {
+									manager.logger().Error("Error reconnecting HTTP connection", zap.Error(err))
+								}
+							} else {
+								// start new connection!
+								err := manager.configs[index].connection.ListenAndServe()
+								if err != nil {
+									manager.logger().Error("Error reconnecting TCP connection", zap.Error(err))
+								}
 							}
+
 						}()
 					}
 				}
